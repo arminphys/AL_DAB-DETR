@@ -18,6 +18,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, DistributedSampler
 import torch.distributed as dist
+from torch import nn
 
 import datasets
 import util.misc as utils
@@ -149,6 +150,20 @@ def get_args_parser():
     parser.add_argument('--device', default='cuda', help='device to use for training / testing')
     parser.add_argument('--seed', default=42, type=int)
     parser.add_argument('--resume', default='', help='resume from checkpoint')
+
+    # AL
+    #
+    # if we introduce new classes and want to continue from existing snapshots, we have to adapt the number of classes from the sved model to the current classes
+    #
+    # So we construct the model with the number of classes that have been used when the model was trained, load the model and then adapt the final embedding.
+    #
+    # Therefore we need two additional paramters, the number of classes in the saved model and the new number of classes
+    #
+    # Default for the old number is 91, which is the standard in coco2017
+
+    parser.add_argument('--number_of_classes_saved', help='highest class number in the saved model from which we resume', default=91, type=int)
+    parser.add_argument('--number_of_classes_new', help='highest classe number in the current dataset + 1', type=int)
+
     parser.add_argument('--pretrain_model_path', help='load from other checkpoint')
     parser.add_argument('--finetune_ignore', type=str, nargs='+', 
                         help="A list of keywords to ignore when loading pretrained models.")
@@ -222,6 +237,8 @@ def main(args):
 
     # build model
     model, criterion, postprocessors = build_model_main(args)
+
+
     wo_class_error = False
     model.to(device)
 
@@ -290,6 +307,30 @@ def main(args):
             optimizer.load_state_dict(checkpoint['optimizer'])
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
             args.start_epoch = checkpoint['epoch'] + 1
+
+        # AL
+        #
+        # If we resume from a checkpoint, we may have to adapt the size of the class embedding
+        #
+        # This concerns model and criterion.
+        #
+        # In 'model' we have the layer 'class_embd' to adapt.
+        #
+        # In 'criterion' we have the number 'num_classes' to adapt.
+        #
+        # see https://stackoverflow.com/questions/76461703/how-do-i-change-the-output-size-of-torch-nn-linear-while-preserving-existing-par
+            
+        if args.number_of_classes_saved != args.number_of_classes_new:
+            criterion.num_classes = args.number_of_classes_new
+            old_weight = model.class_embed.weight.t().detach()
+            old_bias = model.class_embed.bias.detach()
+            hidden_dim = model.class_embed.weight.shape[1]
+            model.class_embed = nn.Linear(hidden_dim, args.number_of_classes_new)
+
+            model.class_embed.weight.data[:args.number_of_classes_saved, :] = old_weight.t()
+            model.class_embed.bias.data[:args.number_of_classes_saved] = old_bias
+            model.class_embed.to(device)
+
 
     if not args.resume and args.pretrain_model_path:
         checkpoint = torch.load(args.pretrain_model_path, map_location='cpu')['model']
