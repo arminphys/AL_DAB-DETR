@@ -16,6 +16,8 @@ import util.misc as utils
 from datasets.coco_eval import CocoEvaluator
 from datasets.panoptic_eval import PanopticEvaluator
 
+import humanize
+
 
 def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     data_loader: Iterable, optimizer: torch.optim.Optimizer,
@@ -30,6 +32,9 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
     model.train()
     criterion.train()
+
+    print('\n\nmax GPU memory allocated: ', humanize.naturalsize(torch.cuda.max_memory_allocated()), '\n\n')
+
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     if not wo_class_error:

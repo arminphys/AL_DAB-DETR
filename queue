@@ -1,0 +1,91 @@
+SKILL(1)                                                                                                                                                        User Commands                                                                                                                                                        SKILL(1)
+
+[1mNAME[0m
+       skill, snice - send a signal or report process status
+
+[1mSYNOPSIS[0m
+       [1mskill [22m[[4msignal[24m] [[4moptions[24m] [4mexpression[0m
+       [1msnice [22m[[4mnew[24m [4mpriority[24m] [[4moptions[24m] [4mexpression[0m
+
+[1mDESCRIPTION[0m
+       These tools are obsolete and unportable.  The command syntax is poorly defined.  Consider using the killall, pkill, and pgrep commands instead.
+
+       The default signal for skill is TERM.  Use -l or -L to list available signals.  Particularly useful signals include HUP, INT, KILL, STOP, CONT, and 0.  Alternate signals may be specified in three ways: -9 -SIGKILL -KILL.
+
+       The default priority for snice is +4.  Priority numbers range from +20 (slowest) to -20 (fastest).  Negative priority numbers are restricted to administrative users.
+
+[1mOPTIONS[0m
+       [1m-f[22m, [1m--fast[0m
+              Fast mode.  This option has not been implemented.
+
+       [1m-i[22m, [1m--interactive[0m
+              Interactive use.  You will be asked to approve each action.
+
+       [1m-l[22m, [1m--list[0m
+              List all signal names.
+
+       [1m-L[22m, [1m--table[0m
+              List all signal names in a nice table.
+
+       [1m-n[22m, [1m--no-action[0m
+              No action; perform a simulation of events that would occur but do not actually change the system.
+
+       [1m-v[22m, [1m--verbose[0m
+              Verbose; explain what is being done.
+
+       [1m-w[22m, [1m--warnings[0m
+              Enable warnings.  This option has not been implemented.
+
+       [1m-h[22m, [1m--help[0m
+              Display help text and exit.
+
+       [1m-V[22m, [1m--version[0m
+              Display version information.
+
+[1mPROCESS SELECTION OPTIONS[0m
+       Selection criteria can be: terminal, user, pid, command.  The options below may be used to ensure correct interpretation.
+
+       [1m-t[22m, [1m--tty [4m[22mtty[0m
+              The next expression is a terminal (tty or pty).
+
+       [1m-u[22m, [1m--user [4m[22muser[0m
+              The next expression is a username.
+
+       [1m-p[22m, [1m--pid [4m[22mpid[0m
+              The next expression is a process ID number.
+
+       [1m-c[22m, [1m--command [4m[22mcommand[0m
+              The next expression is a command name.
+
+       [1m--ns [4m[22mpid[0m
+              Match the processes that belong to the same namespace as pid.
+
+       [1m--nslist [4m[22mns,...[0m
+              list which namespaces will be considered for the --ns option.  Available namespaces: ipc, mnt, net, pid, user, uts.
+
+[1mSIGNALS[0m
+       The behavior of signals is explained in [1msignal[22m(7) manual page.
+
+[1mEXAMPLES[0m
+       [1msnice -c seti -c crack +7[0m
+              Slow down seti and crack commands.
+
+       [1mskill -KILL -t /dev/pts/*[0m
+              Kill users on PTY devices.
+
+       [1mskill -STOP -u viro -u lm -u davem[0m
+              Stop three users.
+
+[1mSEE ALSO[0m
+       [1mkill[22m(1), [1mkill[22m(2), [1mkillall[22m(1), [1mnice[22m(1), [1mpkill[22m(1), [1mrenice[22m(1), [1msignal[22m(7)
+
+[1mSTANDARDS[0m
+       No standards apply.
+
+[1mAUTHOR[0m
+       Albert Cahalan albert@users.sf.net wrote skill and snice in 1999 as a replacement for a non-free version.
+
+[1mREPORTING BUGS[0m
+       Please send bug reports to procps@freelists.org
+
+procps-ng                                                                                                                                                        October 2011                                                                                                                                                        SKILL(1)
